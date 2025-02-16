@@ -2423,6 +2423,12 @@ namespace ACE.Server.WorldObjects
             set { if (value == 0) RemoveProperty(PropertyInt.NumTimesTinkered); else SetProperty(PropertyInt.NumTimesTinkered, value); }
         }
 
+        public int NumTimesAmbered
+        {
+            get => GetProperty(PropertyInt.ImbueStackingBits) ?? 0;
+            set { if (value == 0) RemoveProperty(PropertyInt.ImbueStackingBits); else SetProperty(PropertyInt.ImbueStackingBits, value); }
+        }
+
 
         // ========================================
         //= ======== Position Properties ==========

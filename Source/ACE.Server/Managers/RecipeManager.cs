@@ -161,6 +161,9 @@ namespace ACE.Server.Managers
             if (recipe.IsTinkering())
                 return GetTinkerChance(player, source, target, recipe);
 
+            if (recipe.IsAmber())
+                return GetLuminousAmberChance(player, source, target, recipe);
+
             if (!HasDifficulty(recipe))
                 return 1.0;
 
@@ -193,6 +196,37 @@ namespace ACE.Server.Managers
             var playerCurrentPlusLumAugSkilledCraft = playerSkill.Current + (uint)player.LumAugSkilledCraft;
 
             var successChance = SkillCheck.GetSkillChance(playerCurrentPlusLumAugSkilledCraft, recipe.Difficulty);
+
+            return successChance;
+        }
+
+        public static double? GetLuminousAmberChance(Player player, WorldObject tool, WorldObject target, Recipe recipe)
+        {
+            // calculate % success chance
+            var itemWorkmanship = target.Workmanship ?? 0;
+
+            var amberedCount = target.NumTimesAmbered;
+
+            var recipeSkill = (Skill)recipe.Skill;
+
+            var skill = player.GetCreatureSkill(recipeSkill);
+
+            // tinkering skill must be trained
+            if (skill.AdvancementClass < SkillAdvancementClass.Trained)
+            {
+                player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You are not trained in {skill.Skill.ToSentence()}.", ChatMessageType.Broadcast));
+                return null;
+            }
+
+            var recipeDifficulty = recipe.Difficulty;
+
+            var attemptMod = amberedCount + 1;
+
+            var difficulty = (int)Math.Floor(recipeDifficulty + 40 * Math.Max(itemWorkmanship, 5) * attemptMod);
+
+            var playerCurrentPlusLumAugSkilledCraft = skill.Current + (uint)player.LumAugSkilledCraft;
+
+            var successChance = SkillCheck.GetSkillChance((int)playerCurrentPlusLumAugSkilledCraft, difficulty);
 
             return successChance;
         }
@@ -843,7 +877,7 @@ namespace ACE.Server.Managers
 
                 if (Debug)
                     Console.WriteLine($"PropertyBool.{(PropertyBool)requirement.Stat} {(CompareType)requirement.Enum} {requirement.Value}, current: {value}");
-
+                    
                 if (!VerifyRequirement(player, (CompareType)requirement.Enum, normalized, Convert.ToDouble(requirement.Value), requirement.Message))
                     return false;
             }
@@ -1573,6 +1607,11 @@ namespace ACE.Server.Managers
         public static bool IsImbuing(this Recipe recipe)
         {
             return recipe.SalvageType == 2;
+        }
+
+        public static bool IsAmber(this Recipe recipe)
+        {
+            return recipe.SalvageType == 3;
         }
     }
 }
