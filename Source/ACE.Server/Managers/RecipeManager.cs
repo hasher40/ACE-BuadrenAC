@@ -158,11 +158,11 @@ namespace ACE.Server.Managers
 
         public static double? GetRecipeChance(Player player, WorldObject source, WorldObject target, Recipe recipe)
         {
-            if (recipe.IsTinkering())
-                return GetTinkerChance(player, source, target, recipe);
-
             if (recipe.IsAmber())
                 return GetLuminousAmberChance(player, source, target, recipe);
+
+            if (recipe.IsTinkering())
+                return GetTinkerChance(player, source, target, recipe);
 
             if (!HasDifficulty(recipe))
                 return 1.0;
