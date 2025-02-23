@@ -153,9 +153,13 @@ namespace ACE.Server.Factories
 
         private static int RollNumEnchantments(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
         {
-            if (roll.IsArmor || roll.IsWeapon)
+            if (roll.IsWeapon)
             {
-                return RollNumEnchantments_Armor_Weapon(wo, profile, roll);
+                return RollNumEnchantments_Weapon(wo, profile, roll);
+            }
+            else if (roll.IsArmor)
+            {
+                return RollNumEnchantments_Armor(wo, profile, roll);
             }
             // confirmed:
             // - crowns (classified as TreasureItemType.Jewelry) used this table
@@ -195,7 +199,7 @@ namespace ACE.Server.Factories
             0.75f,  // T8
         };
 
-        private static int RollNumEnchantments_Armor_Weapon(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
+        private static int RollNumEnchantments_Weapon(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
         {
             var tierChances = roll.IsCaster ? EnchantmentChances_Caster : EnchantmentChances_Armor_MeleeMissileWeapon;
 
@@ -207,6 +211,20 @@ namespace ACE.Server.Factories
                 return 1;
             else
                 return 0;
+        }
+
+        private static int RollNumEnchantments_Armor(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
+        {
+            var tierChances = roll.IsCaster ? EnchantmentChances_Caster : EnchantmentChances_Armor_MeleeMissileWeapon;
+
+            var chance = tierChances[profile.Tier - 1];
+
+            var rng = ThreadSafeRandom.NextInterval(profile.LootQualityMod);
+
+            if (rng < chance)
+                return 2;
+            else
+                return 1;
         }
 
         private static int RollNumEnchantments_Clothing_Jewelry_Dinnerware(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
