@@ -136,6 +136,10 @@ namespace ACE.Server.Factories
             if (wo.HasMutateFilter(MutateFilter.ArmorModVsType))
                 MutateArmorModVsType(wo, profile);
 
+            // Assign equipment set before magic, so we can use different spell tables based on the set it rolls
+            if (profile.Tier > 6 && armorType != LootTables.ArmorType.SocietyArmor)
+                TryRollEquipmentSet(wo, profile, roll);
+
             if (isMagical)
             {
                 AssignMagic(wo, profile, roll, true);
@@ -148,9 +152,6 @@ namespace ACE.Server.Factories
                 wo.ItemSpellcraft = null;
                 wo.ItemDifficulty = null;
             }
-
-            if (profile.Tier > 6 && armorType != LootTables.ArmorType.SocietyArmor)
-                TryRollEquipmentSet(wo, profile, roll);
 
             if (roll != null && profile.Tier == 8)
                 TryMutateGearRating(wo, profile, roll);
