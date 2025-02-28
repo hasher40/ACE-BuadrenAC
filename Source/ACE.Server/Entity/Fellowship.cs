@@ -84,7 +84,7 @@ namespace ACE.Server.Entity
                 if (!DepartedMembers.TryGetValue(newMember.Guid.Full, out var timeDeparted))
                 {
                     inviter.Session.Network.EnqueueSend(new GameEventWeenieErrorWithString(inviter.Session, WeenieErrorWithString.LockedFellowshipCannotRecruit_, newMember.Name));
-                    //newMember.SendWeenieError(WeenieError.LockedFellowshipCannotRecruitYou);
+                    newMember.Session.Network.EnqueueSend(new GameMessageSystemChat($"Cannot add to locked fellowship. You were not an original member.", ChatMessageType.Broadcast));
                     return;
                 }
                 else
@@ -93,7 +93,7 @@ namespace ACE.Server.Entity
                     if (DateTime.UtcNow > timeLimit)
                     {
                         inviter.Session.Network.EnqueueSend(new GameEventWeenieErrorWithString(inviter.Session, WeenieErrorWithString.LockedFellowshipCannotRecruit_, newMember.Name));
-                        //newMember.SendWeenieError(WeenieError.LockedFellowshipCannotRecruitYou);
+                        newMember.Session.Network.EnqueueSend(new GameMessageSystemChat($"Cannot add to locked fellowship. The 10 minute grace period to rejoin as elapsed.", ChatMessageType.Broadcast));
                         return;
                     }
                 }
@@ -102,12 +102,14 @@ namespace ACE.Server.Entity
             if (FellowshipMembers.Count >= MaxFellows)
             {
                 inviter.Session.Network.EnqueueSend(new GameEventWeenieError(inviter.Session, WeenieError.YourFellowshipIsFull));
+                newMember.Session.Network.EnqueueSend(new GameMessageSystemChat($"Cannot add to fellowship. The fellowship is already full.", ChatMessageType.Broadcast));
                 return;
             }
 
             if (newMember.Fellowship != null || FellowshipMembers.ContainsKey(newMember.Guid.Full))
             {
                 inviter.Session.Network.EnqueueSend(new GameMessageSystemChat($"{newMember.Name} is already a member of a Fellowship.", ChatMessageType.Broadcast));
+                newMember.Session.Network.EnqueueSend(new GameMessageSystemChat($"You are already a member of a fellowship.", ChatMessageType.Broadcast));
             }
             else
             {
