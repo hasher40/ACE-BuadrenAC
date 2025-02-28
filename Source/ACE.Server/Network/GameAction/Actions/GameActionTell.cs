@@ -49,8 +49,14 @@ namespace ACE.Server.Network.GameAction.Actions
                 //return;
             }
 
-            if (message.Equals("xp", System.StringComparison.OrdinalIgnoreCase) && targetPlayer.Fellowship != null && targetPlayer.Fellowship.Open)
+            if (message.Equals("xp", System.StringComparison.OrdinalIgnoreCase))
             {
+                if (targetPlayer.Fellowship == null)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"[FSHIP]: Cannot add to fellowship. {targetPlayer.Name} is not part of a fellowship.", ChatMessageType.Broadcast));
+                    return;
+                }
+
                 session.Network.EnqueueSend(new GameMessageSystemChat($"[FSHIP]: Attempting to add you to {targetPlayer.Name}'s fellowship.", ChatMessageType.Broadcast));
                 targetPlayer.FellowshipRecruit(session.Player);
                 return;
