@@ -1,6 +1,7 @@
 using ACE.Entity.Enum;
 using ACE.Server.Entity;
 using ACE.Server.Managers;
+using ACE.Server.Network;
 using ACE.Server.Network.GameEvent.Events;
 using ACE.Server.Network.GameMessages.Messages;
 
@@ -99,13 +100,17 @@ namespace ACE.Server.WorldObjects
             {
                 Session.Network.EnqueueSend(new GameMessageSystemChat($"{newPlayer.Name} is not accepting fellowship requests.", ChatMessageType.Fellowship));                
                 Session.Network.EnqueueSend(new GameEventWeenieError(Session, WeenieError.FellowshipIgnoringRequests));
+                newPlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[FSHIP]: Cannot add to fellowship. You are ignoring fellowship requests.", ChatMessageType.Broadcast));
             }
             else if (Fellowship != null)
             {
                 if (Guid.Full == Fellowship.FellowshipLeaderGuid || Fellowship.Open)
                     Fellowship.AddFellowshipMember(this, newPlayer);
                 else
+                {
                     Session.Network.EnqueueSend(new GameEventWeenieError(Session, WeenieError.YouMustBeLeaderOfFellowship));
+                    newPlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[FSHIP]: Cannot add to fellowship. {Name}'s fellowship is not open.", ChatMessageType.Broadcast));
+                }
             }
         }
 
