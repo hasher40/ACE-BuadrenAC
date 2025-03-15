@@ -153,9 +153,13 @@ namespace ACE.Server.Factories
 
         private static int RollNumEnchantments(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
         {
-            if (roll.IsArmor || roll.IsWeapon)
+            if (roll.IsWeapon)
             {
-                return RollNumEnchantments_Armor_Weapon(wo, profile, roll);
+                return RollNumEnchantments_Weapon(wo, profile, roll);
+            }
+            else if (roll.IsArmor)
+            {
+                return RollNumEnchantments_Armor(wo, profile, roll);
             }
             // confirmed:
             // - crowns (classified as TreasureItemType.Jewelry) used this table
@@ -195,7 +199,7 @@ namespace ACE.Server.Factories
             0.75f,  // T8
         };
 
-        private static int RollNumEnchantments_Armor_Weapon(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
+        private static int RollNumEnchantments_Weapon(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
         {
             var tierChances = roll.IsCaster ? EnchantmentChances_Caster : EnchantmentChances_Armor_MeleeMissileWeapon;
 
@@ -207,6 +211,20 @@ namespace ACE.Server.Factories
                 return 1;
             else
                 return 0;
+        }
+
+        private static int RollNumEnchantments_Armor(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
+        {
+            var tierChances = roll.IsCaster ? EnchantmentChances_Caster : EnchantmentChances_Armor_MeleeMissileWeapon;
+
+            var chance = tierChances[profile.Tier - 1];
+
+            var rng = ThreadSafeRandom.NextInterval(profile.LootQualityMod);
+
+            if (rng < chance)
+                return 2;
+            else
+                return 1;
         }
 
         private static int RollNumEnchantments_Clothing_Jewelry_Dinnerware(WorldObject wo, TreasureDeath profile, TreasureRoll roll)
@@ -445,7 +463,7 @@ namespace ACE.Server.Factories
                 else
                     return 3;
             }
-            else if (roll.Wcid == Enum.WeenieClassName.orb)
+            else if (roll.Wcid == Enum.WeenieClassName.orb || (roll.IsCaster && wo.W_DamageType == DamageType.Undef))
             {
                 return 4;
             }
@@ -486,8 +504,9 @@ namespace ACE.Server.Factories
             return 0;
         }
 
-        private static readonly CoverageMask upperArmor = CoverageMask.OuterwearChest | CoverageMask.OuterwearUpperArms | CoverageMask.OuterwearLowerArms | CoverageMask.OuterwearAbdomen;
-        private static readonly CoverageMask lowerArmor = CoverageMask.OuterwearUpperLegs | CoverageMask.OuterwearLowerLegs;     // check abdomen
+        // moved abdomen to lowerArmor -- hauberks, cuirasses, coats will get flagged as both types (test upperArmor before lowerArmor for proper tables)
+        private static readonly CoverageMask upperArmor = CoverageMask.OuterwearChest | CoverageMask.OuterwearUpperArms | CoverageMask.OuterwearLowerArms;
+        private static readonly CoverageMask lowerArmor = CoverageMask.OuterwearAbdomen | CoverageMask.OuterwearUpperLegs | CoverageMask.OuterwearLowerLegs;
 
         private static readonly CoverageMask clothing = CoverageMask.UnderwearChest | CoverageMask.UnderwearUpperArms | CoverageMask.UnderwearLowerArms |
                 CoverageMask.UnderwearAbdomen | CoverageMask.UnderwearUpperLegs | CoverageMask.UnderwearLowerLegs;
@@ -503,9 +522,21 @@ namespace ACE.Server.Factories
                     return 20;
             }
 
+            if (wo.HasItemSet)
+            {
+                switch (wo.EquipmentSetId)
+                {
+                    case EquipmentSet.Tinkers: // special table for tinkers set
+                        return 21;
+                    case EquipmentSet.Crafters: //special table for crafters set
+                        return 22;
+                }
+            }
+
             var coverageMask = wo.ClothingPriority ?? 0;
             var isArmor = roll.IsArmor;
 
+            // Since Abdomen is now in lowerArmor, we shouldn't need the lowerleg test here but it doesnt hurt anything
             if ((coverageMask & upperArmor) != 0 && (coverageMask & CoverageMask.OuterwearLowerLegs) == 0)
                 return 7;
 
@@ -529,7 +560,7 @@ namespace ACE.Server.Factories
             if (coverageMask == CoverageMask.Hands && !isArmor)
                 return 14;
 
-            // leggings
+            // girths and leggings
             if ((coverageMask & lowerArmor) != 0)
                 return 15;
 
