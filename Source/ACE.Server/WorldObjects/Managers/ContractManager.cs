@@ -21,7 +21,7 @@ namespace ACE.Server.WorldObjects.Managers
 
         public Player Player { get; }
 
-        private const int MaxContracts = 100;
+        private const int MaxContracts = 300;
 
         public Dictionary<uint, ContractTracker> ContractTrackerTable
         {
