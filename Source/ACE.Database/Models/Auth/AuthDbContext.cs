@@ -28,10 +28,16 @@ public partial class AuthDbContext : DbContext
 
             var connectionString = $"server={config.Host};port={config.Port};user={config.Username};password={config.Password};database={config.Database};{config.ConnectionOptions}";
 
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), builder =>
+            optionsBuilder.UseMySql(connectionString, DatabaseManager.CachedServerVersionAutoDetect(config.Database, connectionString), builder =>
             {
                 builder.EnableRetryOnFailure(10);
             });
+
+            if (config.EnableDetailedErrors)
+                optionsBuilder.EnableDetailedErrors();
+
+            if (config.EnableSensitiveDataLogging)
+                optionsBuilder.EnableSensitiveDataLogging();
         }
     }
 

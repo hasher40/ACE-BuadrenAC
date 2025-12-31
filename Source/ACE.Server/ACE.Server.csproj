@@ -13,6 +13,7 @@
 
   <PropertyGroup>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <RetainVMGarbageCollection>true</RetainVMGarbageCollection>
   </PropertyGroup>
@@ -234,11 +235,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <PackageReference Include="log4net" Version="2.0.17" />
     <PackageReference Include="Log4Net.Async.Standard" Version="3.1.0" />
-    <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
-    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="McMaster.NETCore.Plugins" Version="2.0.0" />
+    <PackageReference Include="MySqlConnector" Version="2.5.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
   </ItemGroup>
 
@@ -277,6 +278,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="start_server.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="start_server.sh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

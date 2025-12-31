@@ -83,7 +83,7 @@ namespace ACE.Server.WorldObjects
 
             if (CombatMode != CombatMode.Magic)
             {
-                log.Error($"{Name}.HandleActionCastTargetedSpell({targetGuid:X8}, {spellId}, {casterItem?.Name}) - CombatMode mismatch {CombatMode}, LastCombatMode: {LastCombatMode}");
+                log.Warn($"{Name}.HandleActionCastTargetedSpell({targetGuid:X8}, {spellId}, {casterItem?.Name}) - CombatMode mismatch {CombatMode}, LastCombatMode: {LastCombatMode}");
 
                 if (LastCombatMode == CombatMode.Magic)
                     CombatMode = CombatMode.Magic;
@@ -274,7 +274,7 @@ namespace ACE.Server.WorldObjects
 
             if (CombatMode != CombatMode.Magic)
             {
-                log.Error($"{Name}.HandleActionMagicCastUnTargetedSpell({spellId}) - CombatMode mismatch {CombatMode}, LastCombatMode {LastCombatMode}");
+                log.Warn($"{Name}.HandleActionMagicCastUnTargetedSpell({spellId}) - CombatMode mismatch {CombatMode}, LastCombatMode {LastCombatMode}");
 
                 if (LastCombatMode == CombatMode.Magic)
                     CombatMode = CombatMode.Magic;
@@ -596,6 +596,8 @@ namespace ACE.Server.WorldObjects
             var spellWords = spell._spellBase.GetSpellWords(DatManager.PortalDat.SpellComponentsTable);
             if (!string.IsNullOrWhiteSpace(spellWords) && !isWeaponSpell)
                 EnqueueBroadcast(new GameMessageHearSpeech(spellWords, GetNameWithSuffix(), Guid.Full, ChatMessageType.Spellcasting), LocalBroadcastRange);
+
+            OnTalk(spellWords);
         }
 
         public static float CastSpeed = 2.0f;       // from retail pcaps, player animation speed for windup / first half of cast gesture
